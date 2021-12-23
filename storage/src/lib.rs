@@ -19,6 +19,7 @@ use std::path::PathBuf;
 
 /// The directory name for Aleo-related resources.
 const ALEO_DIRECTORY: &str = ".aleo";
+const ALEO_DIRECTORY_ENV: &str = "ALEO_DIRECTORY";
 
 ///
 /// Returns the directory for accessing resources from Aleo storage.
@@ -27,9 +28,12 @@ const ALEO_DIRECTORY: &str = ".aleo";
 pub fn aleo_dir() -> PathBuf {
     // Locate the home directory as the starting point.
     // If called on a non-standard OS, use the repository directory.
-    let mut path = match home_dir() {
-        Some(home) => home,
-        None => PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+    let mut path = match std::env::var(ALEO_DIRECTORY_ENV) {
+        Ok(value) => PathBuf::from(value),
+        Err(_e)   => match home_dir() {
+            Some(home) => home,
+            None => PathBuf::from(env!("CARGO_MANIFEST_DIR")),
+        },
     };
     // Append the Aleo directory to the path.
     path.push(ALEO_DIRECTORY);
